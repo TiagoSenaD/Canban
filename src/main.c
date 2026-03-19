@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "modulos/kanban/include/kanban.h"
 
+int id = 1;
+
 int main() {
 
     Kanban *kanban = (Kanban*) malloc(sizeof(Kanban));
@@ -11,6 +13,7 @@ int main() {
     char description[255];
     int priority = 0;
     int status = 0;
+    int id_to_use = 0;
 
     
     while (1) {
@@ -24,52 +27,54 @@ int main() {
         printf("7 - Sair\n");
         printf("Digite sua opcao: ");
         int opcao;
-        scanf("%d", &opcao);
+        fscanf(stdin,"%d", &opcao);
         printf("\n");
         switch (opcao) {
             case 1:
                 printf("Digite o titulo: ");
-                scanf("%s", title);
+                fscanf(stdin,"%s", title);
                 printf("Digite a descricao: ");
-                scanf("%s", description);
+                fscanf(stdin,"%s", description);
                 printf("1 - Alta\n2 - Media\n3 - Baixa\nEscolha a prioridade: ");
-                scanf("%d", &priority);
+                fscanf(stdin,"%d", &priority);
                 if (priority > 3 || priority < 1) {
                     printf("Prioridade invalida!\n");
                     break;
                 }
-                create_task(kanban, title, description, priority);
+                create_task(kanban, title, description, priority, id);
+                id++;
                 break;
             case 2:
                 list_tasks(kanban);
                 break;
             case 3:
                 printf("Qual tesk sera deletada?");
-                scanf("%s", title);
-                if (locate_task(kanban, title, NULL) == NULL) {
+                fscanf(stdin,"%d", &id_to_use);
+                if (locate_task(kanban, id_to_use, NULL) == NULL) {
                     printf("Tarefa nao encontrada!\n");
                     break;
                 }
-                delete_task(kanban, title);
+                delete_task(kanban, id_to_use);
                 break;
             case 4:
                 printf("Qual tesk sera atualizada?");
-                scanf("%s", title);
+                fscanf(stdin,"%d", &id_to_use);
+                if (locate_task(kanban, id_to_use, NULL) == NULL) {
+                    printf("Tarefa nao encontrada!\n");
+                    break;
+                }
                 printf("Digite o novo titulo: ");
-                scanf("%s", title);
+                fscanf(stdin,"%s", title);
                 printf("Digite a nova descricao: ");
-                scanf("%s", description);
+                fscanf(stdin,"%s", description);
                 printf("1 - Alta\n2 - Media\n3 - Baixa\nEscolha a nova prioridade: ");
-                scanf("%d", &priority);
+                fscanf(stdin,"%d", &priority);
                 if (priority > 3 || priority < 1) {
                     printf("Prioridade invalida!\n");
                     break;
                 }
-                if (locate_task(kanban, title, NULL) == NULL) {
-                    printf("Tarefa nao encontrada!\n");
-                    break;
-                }
-                update_task(kanban, title, description, priority, status);
+
+                update_task(kanban, id_to_use, title, description, priority, status);
                 break;
             case 5:
                 save_tasks(kanban, "tasks.bin");

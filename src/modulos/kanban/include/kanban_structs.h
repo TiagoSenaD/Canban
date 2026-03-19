@@ -1,6 +1,8 @@
 #ifndef KANBAN_STRUCTS_H
 #define KANBAN_STRUCTS_H
 
+
+
 enum Status {
     TODO,
     IN_PROGRESS,
@@ -15,6 +17,7 @@ enum Priority {
 
 
 typedef struct Task {
+    int id;
     char *title;
     char *description;
     enum Priority priority;

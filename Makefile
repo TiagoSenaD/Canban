@@ -1,6 +1,6 @@
 CC = clang
 CFLAGS = -Wall -Wextra -I./src/modulos/kanban/include
-LDFLAGS = -L./build -lkanban -Wl,-rpath,'$$ORIGIN/build'
+LDFLAGS = -L./build -lkanban -Wl,-rpath,'./build'
 
 TARGET_DIR = ./bin
 TARGET = $(TARGET_DIR)/kanban_app

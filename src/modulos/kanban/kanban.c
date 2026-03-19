@@ -14,12 +14,12 @@ void append_task(Kanban *kanban, Task *new_node) {
     }
 }
 
-Task *locate_task(Kanban *kanban, char *title, Task **last_node) {
+Task *locate_task(Kanban *kanban, int id, Task **last_node) {
     Task *current = kanban->tasks;
     Task *prev = NULL;
 
     while (current != NULL) {
-        if (strcmp(current->title, title) == 0) {
+        if (current->id == id) {
             if (last_node != NULL) {
                 *last_node = prev;
             }
@@ -33,7 +33,7 @@ Task *locate_task(Kanban *kanban, char *title, Task **last_node) {
     return NULL;
 }
 
-void create_task(Kanban *kanban, char *title, char *description, int priority) {
+void create_task(Kanban *kanban, char *title, char *description, int priority, int id) {
     Task *new_task = (Task*) malloc(sizeof(Task));
     if (new_task == NULL) return;
 
@@ -41,6 +41,7 @@ void create_task(Kanban *kanban, char *title, char *description, int priority) {
     new_task->description = strdup(description);
     new_task->priority = (enum Priority)priority;
     new_task->status = TODO;
+    new_task->id = id;
     new_task->next = NULL;
 
     append_task(kanban, new_task);
@@ -49,6 +50,7 @@ void create_task(Kanban *kanban, char *title, char *description, int priority) {
 void list_tasks(Kanban *kanban) {
     Task *current = kanban->tasks;
     while (current != NULL) {
+        printf("ID: %d\n", current->id);
         printf("Titulo: %s\n", current->title);
         printf("Descricao: %s\n", current->description);
         printf("Prioridade: %d\n", current->priority);
@@ -57,9 +59,9 @@ void list_tasks(Kanban *kanban) {
     }
 }
 
-void delete_task(Kanban *kanban, char *title) {
+void delete_task(Kanban *kanban, int id) {
     Task *prev = NULL;
-    Task *target = locate_task(kanban, title, &prev);
+    Task *target = locate_task(kanban, id, &prev);
 
     if (target == NULL) {
         printf("Tarefa nao encontrada.\n");
@@ -79,8 +81,8 @@ void delete_task(Kanban *kanban, char *title) {
     printf("Tarefa removida!\n");
 }
 
-void update_task(Kanban *kanban, char *title, char *description, int priority, int status) {
-    Task *task = locate_task(kanban, title, NULL);
+void update_task(Kanban *kanban, int id, char *title, char *description, int priority, int status) {
+    Task *task = locate_task(kanban, id, NULL);
     
     if (task == NULL) return;
     
@@ -91,6 +93,14 @@ void update_task(Kanban *kanban, char *title, char *description, int priority, i
     task->description = strdup(description);
     task->priority = (enum Priority)priority;
     task->status = (enum Status)status;
+
+    printf("Tarefa atualizada!\n");
+    printf("Titulo: %s\n", task->title);
+    printf("Descricao: %s\n", task->description);
+    printf("Prioridade: %d\n", task->priority);
+    printf("Status: %d\n", task->status);
+
+
 }
 
 void save_tasks(Kanban *kanban, char *filename) {
