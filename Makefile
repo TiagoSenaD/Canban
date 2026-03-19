@@ -1,28 +1,52 @@
 CC = clang
-CFLAGS = -Wall -Wextra -I./src/modulos/kanban/include
-LDFLAGS = -L./build -lkanban -Wl,-rpath,'./build'
+# Mantendo suas flags e caminhos de include
+CFLAGS = -Wall -Wextra -fPIC -Isrc/modulos/kanban/include -Isrc/modulos/helpers/include
+LDFLAGS_DEV = -Lbuild -Wl,-rpath,'./build'
 
-TARGET_DIR = ./bin
-TARGET = $(TARGET_DIR)/kanban_app
-SRC = src/main.c
-MOD_DIR = src/modulos/kanban
+BUILD_DIR = build
+BIN_DIR = bin
 
-all: $(TARGET)
+# Definindo os caminhos exatos dos fontes dos módulos
+HELPERS_SRC = src/modulos/helpers/helpers.c
+KANBAN_SRC = src/modulos/kanban/kanban.c
 
-build_module:
-	$(MAKE) -C $(MOD_DIR)
+# Alvos de saída
+HELPERS_SO = $(BUILD_DIR)/libhelpers.so
+KANBAN_SO = $(BUILD_DIR)/libkanban.so
+TARGET_DEV = $(BIN_DIR)/kanban_app_dev
+TARGET_REL = $(BIN_DIR)/kanban_app_release
 
+# --- MODO DEV (Padrão) ---
+all: $(BUILD_DIR) $(BIN_DIR) $(HELPERS_SO) $(KANBAN_SO) $(TARGET_DEV)
 
-$(TARGET): $(SRC) build_module
-	mkdir -p $(TARGET_DIR)
-	$(CC) $(CFLAGS) $(SRC) -o $@ $(LDFLAGS)
-	@echo "Executável gerado em: $(TARGET)"
+# --- MODO RELEASE ---
+release: CFLAGS += -O3
+release: $(BUILD_DIR) $(BIN_DIR) $(TARGET_REL)
+	strip $(TARGET_REL)
+	@echo "✔ Release gerada: $(TARGET_REL)"
 
-run: all
-	./$(TARGET)
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
+# Regras específicas para as bibliotecas compartilhadas (DEV)
+$(HELPERS_SO): $(HELPERS_SRC)
+	$(CC) $(CFLAGS) -shared $< -o $@
+
+$(KANBAN_SO): $(KANBAN_SRC)
+	$(CC) $(CFLAGS) -shared $< -o $@
+
+# Executável de Desenvolvimento (Dynamic Linking)
+$(TARGET_DEV): src/main.c $(HELPERS_SO) $(KANBAN_SO)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS_DEV) -lhelpers -lkanban
+
+# Executável de Release (Static Linking - Compila tudo junto)
+$(TARGET_REL): src/main.c $(HELPERS_SRC) $(KANBAN_SRC)
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -rf $(TARGET_DIR) build/
-	$(MAKE) -C $(MOD_DIR) clean
+	rm -rf $(BUILD_DIR) $(BIN_DIR)
 
-.PHONY: all clean run build_module
+.PHONY: all release clean

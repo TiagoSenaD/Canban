@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "modulos/kanban/include/kanban.h"
+#include "modulos/helpers/include/helpers.h"
 
 int id = 1;
 
@@ -27,16 +28,16 @@ int main() {
         printf("7 - Sair\n");
         printf("Digite sua opcao: ");
         int opcao;
-        fscanf(stdin,"%d", &opcao);
+        scan_int(&opcao);
         printf("\n");
         switch (opcao) {
             case 1:
                 printf("Digite o titulo: ");
-                fscanf(stdin,"%s", title);
+                fgets(title, sizeof(title), stdin);
                 printf("Digite a descricao: ");
-                fscanf(stdin,"%s", description);
+                fgets(description, sizeof(description), stdin);
                 printf("1 - Alta\n2 - Media\n3 - Baixa\nEscolha a prioridade: ");
-                fscanf(stdin,"%d", &priority);
+                scan_int(&priority);
                 if (priority > 3 || priority < 1) {
                     printf("Prioridade invalida!\n");
                     break;
@@ -49,7 +50,7 @@ int main() {
                 break;
             case 3:
                 printf("Qual tesk sera deletada?");
-                fscanf(stdin,"%d", &id_to_use);
+                scan_int(&id_to_use);
                 if (locate_task(kanban, id_to_use, NULL) == NULL) {
                     printf("Tarefa nao encontrada!\n");
                     break;
@@ -58,17 +59,17 @@ int main() {
                 break;
             case 4:
                 printf("Qual tesk sera atualizada?");
-                fscanf(stdin,"%d", &id_to_use);
+                scan_int(&id_to_use);
                 if (locate_task(kanban, id_to_use, NULL) == NULL) {
                     printf("Tarefa nao encontrada!\n");
                     break;
                 }
                 printf("Digite o novo titulo: ");
-                fscanf(stdin,"%s", title);
+                fgets(title, sizeof(title), stdin);
                 printf("Digite a nova descricao: ");
-                fscanf(stdin,"%s", description);
+                fgets(description, sizeof(description), stdin);
                 printf("1 - Alta\n2 - Media\n3 - Baixa\nEscolha a nova prioridade: ");
-                fscanf(stdin,"%d", &priority);
+                scan_int(&priority);
                 if (priority > 3 || priority < 1) {
                     printf("Prioridade invalida!\n");
                     break;
