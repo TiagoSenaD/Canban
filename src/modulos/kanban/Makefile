@@ -1,4 +1,3 @@
-# Variáveis de compilação
 CC = clang
 CFLAGS = -Wall -Wextra -fPIC -I./include
 LDFLAGS = -shared
