@@ -1,25 +1,30 @@
 CC = clang
-# Mantendo suas flags e caminhos de include
-CFLAGS = -Wall -Wextra -fPIC -Isrc/modulos/kanban/include -Isrc/modulos/helpers/include
-LDFLAGS_DEV = -Lbuild -Wl,-rpath,'./build'
+LDFLAGS_DEV = -Lbuild -Wl,-rpath,'./build' 
+GTK_CFLAGS = $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.1)
+GTK_LIBS = $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1)
+CFLAGS = -Wall -Wextra -fPIC \
+         -Isrc/modulos/kanban/include \
+         -Isrc/modulos/helpers/include \
+         -Isrc/modulos/window/include \
+         $(GTK_CFLAGS)
+
 
 BUILD_DIR = build
 BIN_DIR = bin
 
-# Definindo os caminhos exatos dos fontes dos módulos
 HELPERS_SRC = src/modulos/helpers/helpers.c
 KANBAN_SRC = src/modulos/kanban/kanban.c
+WINDOW_SRC = src/modulos/window/window.c
 
-# Alvos de saída
 HELPERS_SO = $(BUILD_DIR)/libhelpers.so
 KANBAN_SO = $(BUILD_DIR)/libkanban.so
+WINDOW_SO = $(BUILD_DIR)/libwindow.so
+
 TARGET_DEV = $(BIN_DIR)/kanban_app_dev
 TARGET_REL = $(BIN_DIR)/kanban_app_release
 
-# --- MODO DEV (Padrão) ---
-all: $(BUILD_DIR) $(BIN_DIR) $(HELPERS_SO) $(KANBAN_SO) $(TARGET_DEV)
+all: $(BUILD_DIR) $(BIN_DIR) $(HELPERS_SO) $(KANBAN_SO) $(WINDOW_SO) $(TARGET_DEV)
 
-# --- MODO RELEASE ---
 release: CFLAGS += -O3
 release: $(BUILD_DIR) $(BIN_DIR) $(TARGET_REL)
 	strip $(TARGET_REL)
@@ -31,19 +36,19 @@ $(BUILD_DIR):
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-# Regras específicas para as bibliotecas compartilhadas (DEV)
 $(HELPERS_SO): $(HELPERS_SRC)
 	$(CC) $(CFLAGS) -shared $< -o $@
 
 $(KANBAN_SO): $(KANBAN_SRC)
 	$(CC) $(CFLAGS) -shared $< -o $@
 
-# Executável de Desenvolvimento (Dynamic Linking)
-$(TARGET_DEV): src/main.c $(HELPERS_SO) $(KANBAN_SO)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS_DEV) -lhelpers -lkanban
+$(WINDOW_SO): $(WINDOW_SRC)
+	$(CC) $(CFLAGS) $(GTK_LIBS) -shared $< -o $@
 
-# Executável de Release (Static Linking - Compila tudo junto)
-$(TARGET_REL): src/main.c $(HELPERS_SRC) $(KANBAN_SRC)
+$(TARGET_DEV): src/main.c $(HELPERS_SO) $(KANBAN_SO) $(WINDOW_SO)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS_DEV) -lhelpers -lkanban -lwindow $(GTK_LIBS)
+
+$(TARGET_REL): src/main.c $(HELPERS_SRC) $(KANBAN_SRC) $(WINDOW_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
